@@ -33,28 +33,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.userInfo}>
-            <Image
-              source={{ uri: "https://i.pravatar.cc/150?img=12" }}
-              style={styles.avatar}
-            />
-            <View>
-              <Text style={styles.welcomeText}>Welcome,</Text>
-              <Text style={styles.userName}>Trung Kien</Text>
-            </View>
-          </View>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/filter")}>
-              <Text style={styles.iconText}>🔍</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton} onPress={() => router.push("/notifications")}>
-              <View style={styles.notificationDot} />
-              <Text style={styles.iconText}>🔔</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
         {/* Search Box */}
         <TouchableOpacity style={styles.searchBox} onPress={() => router.push("/map")}>
@@ -131,26 +109,6 @@ export default function HomeScreen() {
 
         <View style={{ height: 100 }} />
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIconActive}>🏠</Text>
-          <Text style={styles.navTextActive}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/booking")}>
-          <Text style={styles.navIcon}>📅</Text>
-          <Text style={styles.navText}>My Booking</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/message")}>
-          <Text style={styles.navIcon}>💬</Text>
-          <Text style={styles.navText}>Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/profile")}>
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }

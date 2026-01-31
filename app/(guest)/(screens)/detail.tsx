@@ -1,23 +1,22 @@
-import React, { useState } from "react";
 import {
-  Text,
-  View,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  ActivityIndicator,
-} from "react-native";
-import { router } from "expo-router";
-import {
-  useFonts,
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
+  useFonts,
 } from "@expo-google-fonts/plus-jakarta-sans";
-import { ChatIcon } from "../components/Icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function DetailScreen() {
   const [fontsLoaded] = useFonts({
@@ -32,7 +31,9 @@ export default function DetailScreen() {
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#8D613A" />
         </View>
       </SafeAreaView>
@@ -41,23 +42,31 @@ export default function DetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800" }}
+            source={{
+              uri: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+            }}
             style={styles.headerImage}
             resizeMode="cover"
           />
-          
+
           {/* Back Button */}
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Text style={styles.backIcon}>←</Text>
           </TouchableOpacity>
 
           {/* Favorite Button */}
-          <TouchableOpacity 
-            style={styles.favoriteButton} 
+          <TouchableOpacity
+            style={styles.favoriteButton}
             onPress={() => setIsFavorite(!isFavorite)}
           >
             <Text style={styles.favoriteIcon}>{isFavorite ? "⭐" : "☆"}</Text>
@@ -78,7 +87,9 @@ export default function DetailScreen() {
           {/* Location */}
           <View style={styles.locationRow}>
             <Text style={styles.locationIcon}>📍</Text>
-            <Text style={styles.locationText}>123 Le Loi, District 1, HCMC</Text>
+            <Text style={styles.locationText}>
+              123 Le Loi, District 1, HCMC
+            </Text>
           </View>
 
           {/* Rating and Price Row */}
@@ -103,7 +114,9 @@ export default function DetailScreen() {
             </View>
             <View style={styles.ruleRow}>
               <Text style={styles.ruleIcon}>🔇</Text>
-              <Text style={styles.ruleText}>Keep noise at a moderate level</Text>
+              <Text style={styles.ruleText}>
+                Keep noise at a moderate level
+              </Text>
             </View>
             <View style={styles.ruleRow}>
               <Text style={styles.ruleIcon}>🧼</Text>
@@ -143,7 +156,8 @@ export default function DetailScreen() {
           {/* Description */}
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.descriptionText}>
-            A private, quiet workspace fully equipped with modern furniture and high-speed internet. Ideal for focus sessions.
+            A private, quiet workspace fully equipped with modern furniture and
+            high-speed internet. Ideal for focus sessions.
           </Text>
 
           <View style={{ height: 100 }} />
@@ -152,10 +166,16 @@ export default function DetailScreen() {
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.chatButton} onPress={() => router.push("/message")}>
+        <TouchableOpacity
+          style={styles.chatButton}
+          onPress={() => router.push("/message")}
+        >
           <Text style={styles.chatButtonText}>💬</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.selectButton} onPress={() => router.push("/selectbox")}>
+        <TouchableOpacity
+          style={styles.selectButton}
+          onPress={() => router.push("/selectbox")}
+        >
           <Text style={styles.selectButtonText}>SELECT BOX</Text>
         </TouchableOpacity>
       </View>

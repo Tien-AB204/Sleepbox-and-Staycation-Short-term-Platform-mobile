@@ -1,19 +1,26 @@
-import React, { useState } from "react";
 import {
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_600SemiBold,
+  Poppins_700Bold,
+  useFonts,
+} from "@expo-google-fonts/poppins";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { authService } from "../../services/authService";
 import GoogleIcon from "../components/GoogleIcon";
-import { useFonts, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
 
 export default function SignUpScreen() {
   const [fontsLoaded] = useFonts({
@@ -26,26 +33,52 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<"guest" | "host">("guest");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#8D613A" />
         </View>
       </SafeAreaView>
     );
   }
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
+    if (!email || !password || !confirmPassword) {
+      alert("Please fill all fields!");
+      return;
+    }
     if (password !== confirmPassword) {
       alert("Passwords don't match!");
       return;
     }
-    console.log("Sign up pressed", { email, password });
-    // Add your sign up logic here
+
+    try {
+      const response = await authService.signup({
+        email,
+        password,
+        role,
+      });
+      if (response.success) {
+        alert("Account created successfully!");
+        // Navigate based on role
+        if (role === "guest") {
+          router.push("/(guest)/(tabs)/home");
+        } else {
+          router.push("/(host)/(tabs)/dashboard");
+        }
+      } else {
+        alert(response.message);
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   const handleLogin = () => {
@@ -72,6 +105,45 @@ export default function SignUpScreen() {
 
           {/* Form */}
           <View style={styles.form}>
+            {/* Role Selection */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Sign up as</Text>
+              <View style={styles.roleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.roleButton,
+                    role === "guest" && styles.roleButtonActive,
+                  ]}
+                  onPress={() => setRole("guest")}
+                >
+                  <Text
+                    style={[
+                      styles.roleText,
+                      role === "guest" && styles.roleTextActive,
+                    ]}
+                  >
+                    Guest
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.roleButton,
+                    role === "host" && styles.roleButtonActive,
+                  ]}
+                  onPress={() => setRole("host")}
+                >
+                  <Text
+                    style={[
+                      styles.roleText,
+                      role === "host" && styles.roleTextActive,
+                    ]}
+                  >
+                    Host
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
@@ -340,5 +412,30 @@ const styles = StyleSheet.create({
     color: "#262626",
     fontWeight: "700",
     fontFamily: "Poppins_700Bold",
+  },
+  roleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  roleButton: {
+    flex: 1,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  roleButtonActive: {
+    backgroundColor: "#8D613A",
+  },
+  roleText: {
+    fontSize: 16,
+    color: "#666666",
+    fontWeight: "500",
+    fontFamily: "Poppins_500Medium",
+  },
+  roleTextActive: {
+    color: "#FFFFFF",
   },
 });

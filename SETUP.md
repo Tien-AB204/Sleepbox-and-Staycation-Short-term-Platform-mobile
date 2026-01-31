@@ -213,7 +213,10 @@ FE-GUEST-MOBLIE/
 Email: kien123
 Password: 123456
 ```
-
+```
+Email: tien123
+Password: 123456
+```
 ---
 
 ## 🐛 Troubleshooting

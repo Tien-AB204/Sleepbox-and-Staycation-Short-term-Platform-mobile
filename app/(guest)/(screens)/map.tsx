@@ -1,24 +1,29 @@
+import {
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  useFonts,
+} from "@expo-google-fonts/plus-jakarta-sans";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Text,
-  View,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  TextInput,
   ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { router } from "expo-router";
-import { 
-  useFonts, 
-  PlusJakartaSans_400Regular,
-  PlusJakartaSans_500Medium, 
-  PlusJakartaSans_600SemiBold,
-  PlusJakartaSans_700Bold 
-} from "@expo-google-fonts/plus-jakarta-sans";
-import { BackIcon, SearchIcon, FilterFunnelIcon, ChatIcon } from "../components/Icons";
+import {
+  BackIcon,
+  ChatIcon,
+  FilterFunnelIcon,
+  SearchIcon,
+} from "../../components/Icons";
 
 interface LocationMarker {
   id: string;
@@ -72,13 +77,17 @@ export default function MapScreen() {
     PlusJakartaSans_700Bold,
   });
 
-  const [selectedLocation, setSelectedLocation] = useState<LocationMarker>(locations[0]);
+  const [selectedLocation, setSelectedLocation] = useState<LocationMarker>(
+    locations[0],
+  );
   const [activeFilter, setActiveFilter] = useState("All Boxes");
 
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#8D613A" />
         </View>
       </SafeAreaView>
@@ -90,11 +99,12 @@ export default function MapScreen() {
       {/* Map Background Placeholder */}
       <View style={styles.mapContainer}>
         <Image
-          source={{ uri: "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/106.7,10.8,12,0/600x800@2x?access_token=pk.example" }}
+          source={{
+            uri: "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/106.7,10.8,12,0/600x800@2x?access_token=pk.example",
+          }}
           style={styles.mapBackground}
-          defaultSource={require("../assets/images/react-logo.png")}
         />
-        
+
         {/* Location Markers */}
         {locations.map((location) => (
           <TouchableOpacity
@@ -108,7 +118,10 @@ export default function MapScreen() {
             ]}
             onPress={() => setSelectedLocation(location)}
           >
-            <Image source={{ uri: location.image }} style={styles.markerImage} />
+            <Image
+              source={{ uri: location.image }}
+              style={styles.markerImage}
+            />
             <View style={styles.markerRating}>
               <Text style={styles.starIcon}>⭐</Text>
               <Text style={styles.markerRatingText}>{location.rating}</Text>
@@ -120,7 +133,10 @@ export default function MapScreen() {
       {/* Header */}
       <View style={styles.headerContainer}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
             <BackIcon size={24} color="#1A1A1A" />
           </TouchableOpacity>
           <View style={styles.searchBar}>
@@ -131,8 +147,8 @@ export default function MapScreen() {
               placeholderTextColor="#B0B0B0"
             />
           </View>
-          <TouchableOpacity 
-            onPress={() => router.push("/filter")} 
+          <TouchableOpacity
+            onPress={() => router.push("/filter")}
             style={styles.filterButton}
           >
             <FilterFunnelIcon size={22} color="#1A1A1A" />
@@ -141,8 +157,8 @@ export default function MapScreen() {
 
         {/* Filter Tabs */}
         <View style={styles.filterTabs}>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filterTabsContent}
           >
@@ -172,19 +188,24 @@ export default function MapScreen() {
       {/* Bottom Sheet */}
       <View style={styles.bottomSheet}>
         <View style={styles.bottomSheetHandle} />
-        <TouchableOpacity 
-          style={styles.locationCard} 
+        <TouchableOpacity
+          style={styles.locationCard}
           activeOpacity={0.9}
           onPress={() => router.push("/detail")}
         >
-          <Image source={{ uri: selectedLocation.image }} style={styles.locationImage} />
+          <Image
+            source={{ uri: selectedLocation.image }}
+            style={styles.locationImage}
+          />
           <View style={styles.locationInfo}>
             <View style={styles.locationHeader}>
               <View>
                 <Text style={styles.locationName}>{selectedLocation.name}</Text>
                 <View style={styles.distanceRow}>
                   <Text style={styles.pinIcon}>📍</Text>
-                  <Text style={styles.distanceText}>{selectedLocation.distance}</Text>
+                  <Text style={styles.distanceText}>
+                    {selectedLocation.distance}
+                  </Text>
                 </View>
               </View>
               <View style={styles.ratingBadge}>
@@ -193,11 +214,17 @@ export default function MapScreen() {
               </View>
             </View>
             <View style={styles.locationFooter}>
-              <Text style={styles.price}>${selectedLocation.price}<Text style={styles.priceUnit}>/night</Text></Text>
+              <Text style={styles.price}>
+                ${selectedLocation.price}
+                <Text style={styles.priceUnit}>/night</Text>
+              </Text>
               <TouchableOpacity style={styles.bookButton}>
                 <Text style={styles.bookButtonText}>Booking Now</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.chatButton} onPress={() => router.push("/message")}>
+              <TouchableOpacity
+                style={styles.chatButton}
+                onPress={() => router.push("/message")}
+              >
                 <ChatIcon size={16} color="#1A1A1A" />
               </TouchableOpacity>
             </View>

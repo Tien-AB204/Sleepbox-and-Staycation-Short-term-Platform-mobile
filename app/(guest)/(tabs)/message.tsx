@@ -94,7 +94,7 @@ export default function MessageScreen() {
             <Text style={styles.headerStatus}>Online</Text>
           </View>
         </View>
-
+        
         {/* Messages */}
         <ScrollView
           style={styles.messagesContainer}

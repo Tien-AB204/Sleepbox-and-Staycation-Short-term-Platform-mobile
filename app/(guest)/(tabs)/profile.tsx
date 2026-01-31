@@ -1,23 +1,28 @@
-import React, { useState } from "react";
 import {
-  Text,
-  View,
-  StyleSheet,
-  SafeAreaView,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Switch,
-  ActivityIndicator,
-} from "react-native";
-import { router } from "expo-router";
-import {
-  useFonts,
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
+  useFonts,
 } from "@expo-google-fonts/plus-jakarta-sans";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { authService } from "../../../services/authService";
+const handleLogout = async () => {
+  await authService.logout();
+  router.replace("/(auth)/login");
+};
 
 export default function ProfileScreen() {
   const [fontsLoaded] = useFonts({
@@ -32,7 +37,9 @@ export default function ProfileScreen() {
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#8D613A" />
         </View>
       </SafeAreaView>
@@ -42,9 +49,6 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <Text style={styles.headerTitle}>Profile</Text>
-
         {/* Avatar */}
         <View style={styles.avatarSection}>
           <Image
@@ -108,28 +112,11 @@ export default function ProfileScreen() {
           <Text style={styles.editButtonText}>Edit Profile</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Log out</Text>
+        </TouchableOpacity>
         <View style={{ height: 100 }} />
       </ScrollView>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/home")}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📅</Text>
-          <Text style={styles.navText}>Booking</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/message")}>
-          <Text style={styles.navIcon}>💬</Text>
-          <Text style={styles.navText}>Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIconActive}>👤</Text>
-          <Text style={styles.navTextActive}>Profile</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -257,6 +244,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#8D613A",
+    fontFamily: "PlusJakartaSans_700Bold",
+  },
+  logoutButton: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    paddingVertical: 18,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: "#8D613A",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+  },
+  logoutButtonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "#8D613A",

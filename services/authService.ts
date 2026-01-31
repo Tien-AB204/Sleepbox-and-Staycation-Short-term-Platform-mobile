@@ -13,18 +13,30 @@ interface LoginResponse {
     username: string;
     name: string;
     email: string;
+    role: "guest" | "host";
   };
   token?: string;
 }
 
 // Mock user data
-const MOCK_USER = {
-  id: "1",
-  username: "kien123",
-  password: "123456",
-  name: "Trung Kien",
-  email: "helloteja@gmail.com",
-};
+const MOCK_USERS = [
+  {
+    id: "1",
+    username: "kien123",
+    password: "123456",
+    name: "Trung Kien",
+    email: "helloteja@gmail.com",
+    role: "guest" as "guest" | "host",
+  },
+  {
+    id: "2",
+    username: "tien123",
+    password: "123456",
+    name: "Tien Host",
+    email: "tienhost@boxhub.com",
+    role: "host" as "guest" | "host",
+  },
+];
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,18 +48,21 @@ export const authService = {
     await delay(1000);
 
     // Validate credentials
-    if (
-      credentials.username === MOCK_USER.username &&
-      credentials.password === MOCK_USER.password
-    ) {
+    const found = MOCK_USERS.find(
+      (u) =>
+        u.username === credentials.username &&
+        u.password === credentials.password
+    );
+    if (found) {
       return {
         success: true,
         message: "Login successful",
         user: {
-          id: MOCK_USER.id,
-          username: MOCK_USER.username,
-          name: MOCK_USER.name,
-          email: MOCK_USER.email,
+          id: found.id,
+          username: found.username,
+          name: found.name,
+          email: found.email,
+          role: found.role,
         },
         token: "mock_token_" + Date.now(),
       };
@@ -63,6 +78,7 @@ export const authService = {
   signup: async (data: {
     email: string;
     password: string;
+    role: "guest" | "host";
   }): Promise<LoginResponse> => {
     await delay(1000);
 
@@ -74,6 +90,7 @@ export const authService = {
         username: data.email.split("@")[0],
         name: "New User",
         email: data.email,
+        role: data.role,
       },
       token: "mock_token_" + Date.now(),
     };
