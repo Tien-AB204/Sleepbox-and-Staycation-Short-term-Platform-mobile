@@ -162,7 +162,7 @@ export default function MapScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filterTabsContent}
           >
-            {["All Boxes", "Popular", "Price: Low"].map((filter) => (
+            {[].map((filter) => (
               <TouchableOpacity
                 key={filter}
                 style={[

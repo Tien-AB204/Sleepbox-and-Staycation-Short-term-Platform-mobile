@@ -1,17 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function GuestTabsLayout() {
+  const { t } = useTranslation();
+  const { colors, isDarkMode } = useTheme();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#8D613A",
-        tabBarInactiveTintColor: "#666666",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.subText,
         tabBarStyle: {
-          backgroundColor: "#ffffff",
+          backgroundColor: isDarkMode ? "#121212" : "#ffffff",
           borderTopWidth: 1,
-          borderTopColor: "#e5e5e5",
+          borderTopColor: colors.border,
           height: 60,
           paddingBottom: 5,
           paddingTop: 5,
@@ -21,7 +25,7 @@ export default function GuestTabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: t("home"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home-outline" size={size} color={color} />
           ),
@@ -30,7 +34,7 @@ export default function GuestTabsLayout() {
       <Tabs.Screen
         name="booking"
         options={{
-          title: "Booking",
+          title: t("booking"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="calendar-outline" size={size} color={color} />
           ),
@@ -39,25 +43,26 @@ export default function GuestTabsLayout() {
       <Tabs.Screen
         name="message"
         options={{
-          title: "Message",
+          href: null,
+          title: t("message") || "Message",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubble-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="notifications"
+        name="favorite"
         options={{
-          title: "Notifications",
+          title: t("favorite"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications-outline" size={size} color={color} />
+            <Ionicons name="heart-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: t("profile"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
           ),

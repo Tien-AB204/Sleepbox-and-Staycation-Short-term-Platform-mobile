@@ -20,8 +20,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import GoogleIcon from "../../components/GoogleIcon";
 import { authService } from "../../services/authService";
-import GoogleIcon from "../components/GoogleIcon";
 
 export default function LoginScreen() {
   const [fontsLoaded] = useFonts({
@@ -33,7 +33,6 @@ export default function LoginScreen() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"guest" | "host">("guest");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,25 +50,31 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both username and password");
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
 
     setIsLoading(true);
 
     try {
+      console.log("Email gửi lên:", email);
+      console.log("Password gửi lên:", password);
       const response = await authService.login({
-        username: email,
+        email: email, 
         password: password,
       });
 
-      if (response.success) {
-        Alert.alert("Success", "Login successful!");
-        // Navigate based on role
-        if (role === "guest") {
-          router.push("/(guest)/(tabs)/home");
+      if (response.success && response.user) {
+        // KIỂM TRA ROLE VÀ ĐIỀU HƯỚNG TẠI ĐÂY
+        if (response.user.role === "host") {
+          Alert.alert(
+            "Access Denied", 
+            "The mobile app is for Guests only. Please use our web platform to manage your Sleepboxes."
+          );
         } else {
-          router.push("/(host)/(tabs)/dashboard");
+          Alert.alert("Success", "Login successful!");
+          // Điều hướng vào app cho Guest (dùng replace để không back lại được login)
+          router.replace("/(tabs)/home");
         }
       } else {
         Alert.alert("Login Failed", response.message);
@@ -110,52 +115,14 @@ export default function LoginScreen() {
 
           {/* Form */}
           <View style={styles.form}>
-            {/* Role Selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Login as</Text>
-              <View style={styles.roleContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === "guest" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setRole("guest")}
-                >
-                  <Text
-                    style={[
-                      styles.roleText,
-                      role === "guest" && styles.roleTextActive,
-                    ]}
-                  >
-                    Guest
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    role === "host" && styles.roleButtonActive,
-                  ]}
-                  onPress={() => setRole("host")}
-                >
-                  <Text
-                    style={[
-                      styles.roleText,
-                      role === "host" && styles.roleTextActive,
-                    ]}
-                  >
-                    Host
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
+            
             {/* Email Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <View style={styles.inputContainer}>
                 <TextInput
                   style={styles.input}
-                  placeholder="helloteja@gmail.com"
+                  placeholder="guest@gmail.com" 
                   placeholderTextColor="#999"
                   value={email}
                   onChangeText={setEmail}
@@ -419,30 +386,5 @@ const styles = StyleSheet.create({
     color: "#262626",
     fontWeight: "700",
     fontFamily: "Poppins_700Bold",
-  },
-  roleContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  roleButton: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginHorizontal: 4,
-  },
-  roleButtonActive: {
-    backgroundColor: "#8D613A",
-  },
-  roleText: {
-    fontSize: 16,
-    color: "#666666",
-    fontWeight: "500",
-    fontFamily: "Poppins_500Medium",
-  },
-  roleTextActive: {
-    color: "#FFFFFF",
   },
 });

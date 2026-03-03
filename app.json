@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "FE-GUEST-MOBLIE",
-    "slug": "FE-GUEST-MOBLIE",
+    "name": "capstone-mobile",
+    "slug": "capstone-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "feguestmoblie",
+    "scheme": "capstonemobile",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
