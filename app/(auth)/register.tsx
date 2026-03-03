@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -19,8 +20,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import GoogleIcon from "../../components/GoogleIcon";
 import { authService } from "../../services/authService";
-import GoogleIcon from "../components/GoogleIcon";
 
 export default function SignUpScreen() {
   const [fontsLoaded] = useFonts({
@@ -36,6 +37,7 @@ export default function SignUpScreen() {
   const [role, setRole] = useState<"guest" | "host">("guest");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!fontsLoaded) {
     return (
@@ -49,35 +51,39 @@ export default function SignUpScreen() {
     );
   }
 
+  // Trong file signup.tsx, sửa hàm handleSignUp:
+
   const handleSignUp = async () => {
     if (!email || !password || !confirmPassword) {
-      alert("Please fill all fields!");
+      Alert.alert("Error", "Please fill all fields!");
       return;
     }
     if (password !== confirmPassword) {
-      alert("Passwords don't match!");
+      Alert.alert("Error", "Passwords don't match!");
       return;
     }
 
+    setIsLoading(true);
+
     try {
+      // Ở đây chúng ta gọi API và truyền đúng 3 biến mà Backend yêu cầu
       const response = await authService.signup({
         email,
         password,
-        role,
+        confirmPassword, // <--- Sửa biến role thành confirmPassword
       });
+
       if (response.success) {
-        alert("Account created successfully!");
-        // Navigate based on role
-        if (role === "guest") {
-          router.push("/(guest)/(tabs)/home");
-        } else {
-          router.push("/(host)/(tabs)/dashboard");
-        }
+        // Vì API Register là của Guest (/guest/register), nên thành công là vào app luôn
+        Alert.alert("Success", "Account created successfully!");
+        router.replace("/(tabs)/home"); 
       } else {
-        alert(response.message);
+        Alert.alert("Error", response.message);
       }
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -219,10 +225,15 @@ export default function SignUpScreen() {
 
             {/* Sign Up Button */}
             <TouchableOpacity
-              style={styles.signUpButton}
+              style={[styles.signUpButton, isLoading && styles.signUpButtonDisabled]}
               onPress={handleSignUp}
+              disabled={isLoading}
             >
-              <Text style={styles.signUpButtonText}>Sign Up</Text>
+              {isLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.signUpButtonText}>Sign Up</Text>
+              )}
             </TouchableOpacity>
 
             {/* Login Link */}
@@ -272,7 +283,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   header: {
-    marginBottom: 50,
+    marginBottom: 30,
   },
   title: {
     fontSize: 44,
@@ -342,6 +353,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 5,
+  },
+  signUpButtonDisabled: {
+    backgroundColor: "#B89968",
+    opacity: 0.7,
   },
   signUpButtonText: {
     color: "#FFFFFF",

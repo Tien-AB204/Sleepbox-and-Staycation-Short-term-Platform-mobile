@@ -30,8 +30,8 @@
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/ThaiTuKien1012/FE-GUEST-MOBLIE.git
-cd FE-GUEST-MOBLIE/FE-GUEST-MOBLIE
+git clone https://github.com/Tien-AB204/Sleepbox-and-Staycation-Short-term-Platform-mobile.git
+cd FE-GUEST-MOBILE/FE-GUEST-MOBILE
 ```
 
 ### 2. Cài Đặt Dependencies
@@ -98,7 +98,7 @@ npx expo start --web
 ## 📁 Cấu Trúc Dự Án
 
 ```
-FE-GUEST-MOBLIE/
+capstone-mobile/
 ├── app/                          # 📱 Screens (Expo Router)
 │   ├── index.tsx                 # 🔐 Login Screen
 │   ├── signup.tsx                # 📝 Sign Up Screen
@@ -327,7 +327,7 @@ Home (home.tsx)
 ## 👨‍💻 Development Team
 
 - **Developer**: ThaiTuKien1012
-- **Repository**: [GitHub](https://github.com/ThaiTuKien1012/FE-GUEST-MOBLIE)
+- **Repository**: [GitHub](https://github.com/Tien-AB204/Sleepbox-and-Staycation-Short-term-Platform-mobile.git)
 
 ---
 
