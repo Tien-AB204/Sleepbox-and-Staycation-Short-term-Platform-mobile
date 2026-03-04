@@ -3,11 +3,14 @@ import {
   Poppins_500Medium,
   Poppins_600SemiBold,
   Poppins_700Bold,
+  Poppins_900Black,
   useFonts,
 } from "@expo-google-fonts/poppins";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useFocusEffect } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,17 +18,17 @@ import {
   ActivityIndicator,
   Image,
   Modal,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useTheme } from "../../context/ThemeContext";
 
-// --- 1. MOCK DATA & HELPER FUNCTIONS ---
 interface BoxItem {
   id: string;
   title: string;
@@ -33,11 +36,37 @@ interface BoxItem {
   price: number;
   rating: number;
   image: string;
-  badge?: string;
   type: "popular" | "recommended";
 }
 
-// Chuyển MOCK_DATA thành hàm nhận t() để dịch
+// MOCK DATA CHO PHẦN KHÁM PHÁ
+interface ExploreItem {
+  id: string;
+  title: string;
+  image: string;
+  places: number;
+}
+const EXPLORE_DATA: ExploreItem[] = [
+  {
+    id: "e1",
+    title: "Cắm trại Glamping",
+    places: 124,
+    image: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?w=400",
+  },
+  {
+    id: "e2",
+    title: "Staycation Cuối tuần",
+    places: 86,
+    image: "https://images.unsplash.com/photo-1542314831-c6a4d27ce006?w=400",
+  },
+  {
+    id: "e3",
+    title: "Gần biển Vũng Tàu",
+    places: 42,
+    image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400",
+  },
+];
+
 const getMockData = (t: any): BoxItem[] => [
   {
     id: "horizon-1",
@@ -84,39 +113,21 @@ const getMockData = (t: any): BoxItem[] => [
     image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400",
     type: "recommended",
   },
-  {
-    id: "green-haven-1",
-    title: "Green Haven",
-    location: `${t("thu_duc_city")}, ${t("hcmc")}`,
-    price: 30,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-    type: "recommended",
-  },
 ];
 
-// Chuyển SUGGESTED_LOCATIONS thành hàm nhận t()
-const getSuggestedLocations = (t: any) => [
-  t("thu_duc_city"),
-  t("district_1"),
-  t("district_3"),
-  t("district_4"),
-  t("district_5"),
-  t("district_6"),
-  t("district_7"),
-  t("district_8"),
-  t("district_10"),
-  t("district_11"),
-  t("district_12"),
-  t("phu_nhuan_dist"),
-  t("binh_thanh_dist"),
-  t("go_vap_dist"),
-  t("tan_binh_dist"),
-  t("binh_tan_dist"),
-  t("tan_phu_dist"),
+const locationOptions = [
+  "thu_duc_city",
+  "district_1",
+  "district_3",
+  "district_4",
+  "district_5",
+  "district_6",
+  "district_7",
 ];
-
-// --- 2. REUSABLE COMPONENTS ---
+const boxTypeOptions = [
+  { id: "single", label: "Single" },
+  { id: "double", label: "Double" },
+];
 
 const BoxCard = ({
   item,
@@ -128,7 +139,6 @@ const BoxCard = ({
   onToggleFavorite: () => void;
 }) => {
   const { colors } = useTheme();
-
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.card }]}
@@ -169,26 +179,39 @@ const BoxCard = ({
   );
 };
 
-// --- 3. MAIN SCREEN ---
-
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { colors, isDarkMode } = useTheme();
-
-  // Khởi tạo data động
   const mockData = getMockData(t);
-  const suggestedLocations = getSuggestedLocations(t);
-
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
+    Poppins_900Black,
   });
 
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [isSearchModalVisible, setSearchModalVisible] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [showBoxTypeModal, setShowBoxTypeModal] = useState(false);
+  const [boxType, setBoxType] = useState<string | null>(null);
+
+  // --- CALENDAR & TIME STATES ---
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [hasSelectedDate, setHasSelectedDate] = useState(false);
+  const [isOvernight, setIsOvernight] = useState(false);
+
+  const [fromTime, setFromTime] = useState<Date>(
+    new Date(new Date().setHours(10, 0, 0, 0)),
+  );
+  const [toTime, setToTime] = useState<Date>(
+    new Date(new Date().setHours(11, 30, 0, 0)),
+  );
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [timePickerMode, setTimePickerMode] = useState<"from" | "to">("from");
 
   useFocusEffect(
     React.useCallback(() => {
@@ -200,182 +223,162 @@ export default function HomeScreen() {
     try {
       const saved = await AsyncStorage.getItem("favorites");
       if (saved) setFavorites(JSON.parse(saved));
-    } catch (error) {
-      console.error("Error loading favorites:", error);
-    }
+    } catch (error) {}
   };
 
   const toggleFavorite = async (itemId: string) => {
     try {
       let updated = [...favorites];
-      if (updated.includes(itemId)) {
+      if (updated.includes(itemId))
         updated = updated.filter((id) => id !== itemId);
-      } else {
-        updated = [...updated, itemId];
-      }
+      else updated = [...updated, itemId];
       setFavorites(updated);
       await AsyncStorage.setItem("favorites", JSON.stringify(updated));
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-    }
+    } catch (error) {}
   };
 
   const isFavorited = (itemId: string) => favorites.includes(itemId);
-
-  const handleLocationSelect = (location: string) => {
-    setSearchModalVisible(false);
-    console.log("Selected:", location);
-    if (location === "Near Me") {
-      router.push("/map");
-    } else {
-      router.push({ pathname: "/filter", params: { location } });
-    }
+  const handleSearch = () => {
+    setShowLocationDropdown(false);
+    router.push("/searchresults");
   };
 
-  // --- Theme Styles ---
+  // ==========================================
+  // CÁC HÀM XỬ LÝ LỊCH VÀ GIỜ ĐƯỢC THÊM LẠI
+  // ==========================================
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    return {
+      firstDay: new Date(year, month, 1).getDay(),
+      daysInMonth: new Date(year, month + 1, 0).getDate(),
+    };
+  };
+
+  const formatShortDate = (date: Date) => {
+    const months = [
+      t("jan"),
+      t("feb"),
+      t("mar"),
+      t("apr"),
+      t("may"),
+      t("jun"),
+      t("jul"),
+      t("aug"),
+      t("sep"),
+      t("oct"),
+      t("nov"),
+      t("dec"),
+    ];
+    return `${date.getDate()} ${months[date.getMonth()]}`;
+  };
+
+  const getDisplayDateRange = () => {
+    if (!selectedDate) return t("select_date", "Select Date");
+    let display = formatShortDate(selectedDate);
+    if (isOvernight) {
+      const nextDate = new Date(selectedDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      display += ` - ${formatShortDate(nextDate)}`;
+    }
+    return display;
+  };
+
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+  const handleDateSelect = (day: number) => {
+    const newDate = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day,
+    );
+    setSelectedDate(newDate);
+    setHasSelectedDate(true);
+  };
+
+  const changeMonth = (delta: number) => {
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + delta),
+    );
+  };
+
+  const openTimePicker = (mode: "from" | "to") => {
+    setTimePickerMode(mode);
+    setShowTimePicker(true);
+  };
+
+  const onTimeChange = (event: any, selectedTime?: Date) => {
+    if (Platform.OS === "android") setShowTimePicker(false);
+    if (selectedTime) {
+      if (timePickerMode === "from") setFromTime(selectedTime);
+      else setToTime(selectedTime);
+    }
+  };
+  // ==========================================
+
   const themeStyles = {
     container: { backgroundColor: colors.background },
     text: { color: colors.text },
     subText: { color: colors.subText },
-    searchBar: { backgroundColor: isDarkMode ? "#1F1F1F" : "#F5F5F5" },
-    icon: { color: colors.text },
-    modalHeader: { borderBottomColor: colors.border },
-    locationItem: { borderBottomColor: isDarkMode ? "#333" : "#F9F9F9" },
+    card: { backgroundColor: colors.card },
+    searchCard: {
+      backgroundColor: isDarkMode ? "#1A1A1A" : "#FFFFFF",
+      borderColor: isDarkMode ? "#333" : "#EAEAEA",
+    },
+    dropdownBg: {
+      backgroundColor: isDarkMode ? "#2C2C2C" : "#FFFFFF",
+      borderColor: isDarkMode ? "#444" : "#EAEAEA",
+    },
+    border: { borderBottomColor: isDarkMode ? "#333" : "#F0F0F0" },
+    modalBg: { backgroundColor: colors.card },
   };
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded)
     return (
       <SafeAreaView style={[styles.container, themeStyles.container]}>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
+        <ActivityIndicator
+          size="large"
+          color={colors.primary}
+          style={{ flex: 1 }}
+        />
       </SafeAreaView>
     );
-  }
 
   return (
     <SafeAreaView style={[styles.container, themeStyles.container]}>
-      {/* --- SEARCH MODAL (POPUP) --- */}
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={isSearchModalVisible}
-        onRequestClose={() => setSearchModalVisible(false)}
+      {/* NỀN MỜ Ở PHẦN HEADER */}
+      <View
+        style={{ position: "absolute", top: 0, left: 0, right: 0, height: 350 }}
       >
-        <SafeAreaView style={[styles.modalContainer, themeStyles.container]}>
-          {/* Modal Header */}
-          <View style={[styles.modalHeader, themeStyles.modalHeader]}>
-            <TouchableOpacity onPress={() => setSearchModalVisible(false)}>
-              <Ionicons name="arrow-back" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <View style={[styles.modalSearchBar, themeStyles.searchBar]}>
-              <Ionicons
-                name="search"
-                size={20}
-                color={colors.subText}
-                style={{ marginRight: 8 }}
-              />
-              <TextInput
-                style={[styles.modalInput, { color: colors.text }]}
-                placeholder={t("where_stay", "Where do you want to stay?")}
-                placeholderTextColor={colors.subText}
-                value={searchText}
-                onChangeText={setSearchText}
-                autoFocus={true}
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchText("")}>
-                  <Ionicons
-                    name="close-circle"
-                    size={18}
-                    color={colors.subText}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
+        <LinearGradient
+          colors={[
+            isDarkMode ? "#332211" : "#F3E5D8",
+            themeStyles.container.backgroundColor,
+          ]}
+          style={{ flex: 1 }}
+        />
+      </View>
 
-          {/* Modal Content */}
-          <ScrollView
-            style={styles.modalContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Near Me Option */}
-            <TouchableOpacity
-              style={[styles.locationItem, themeStyles.locationItem]}
-              onPress={() => handleLocationSelect("Near Me")}
-            >
-              <View style={[styles.locationIconContainer, styles.nearMeIcon]}>
-                <Ionicons name="navigate" size={20} color="#FFFFFF" />
-              </View>
-              <View>
-                <Text style={[styles.locationTitle, themeStyles.text]}>
-                  {t("near_me", "Near me")}
-                </Text>
-                <Text style={[styles.locationSubtitle, themeStyles.subText]}>
-                  {t(
-                    "find_sleepboxes_around",
-                    "Find boxes around your location",
-                  )}
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <Text style={[styles.suggestionTitle, themeStyles.text]}>
-              {t("popular_destinations", "Popular Destinations")}
-            </Text>
-
-            {/* List Suggestions */}
-            {suggestedLocations.map((loc, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.locationItem, themeStyles.locationItem]}
-                onPress={() => handleLocationSelect(loc)}
-              >
-                <View
-                  style={[styles.locationIconContainer, themeStyles.searchBar]}
-                >
-                  <Ionicons
-                    name="location-outline"
-                    size={20}
-                    color={colors.subText}
-                  />
-                </View>
-                {/* Đã xóa chữ cứng Ho Chi Minh City, dùng t("hcmc") */}
-                <Text style={[styles.locationText, themeStyles.text]}>
-                  {loc}, {t("hcmc")}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
-      {/* --- HOME SCREEN HEADER --- */}
-      <View style={[styles.header, themeStyles.container]}>
+      <View style={styles.header}>
         <Image
           source={{ uri: "https://i.pravatar.cc/150?img=12" }}
           style={styles.avatar}
         />
-
-        <TouchableOpacity
-          style={[styles.headerSearchBar, themeStyles.searchBar]}
-          onPress={() => setSearchModalVisible(true)}
-          activeOpacity={0.9}
-        >
-          <Ionicons
-            name="search"
-            size={20}
-            color={colors.subText}
-            style={{ marginRight: 8 }}
-          />
-          <Text style={[styles.headerSearchText, themeStyles.subText]}>
-            {t("find_sleepbox", "Find sleepbox...")}
+        <View style={styles.logoContainer}>
+          <Text
+            style={[
+              styles.logoText,
+              { color: isDarkMode ? "#FFFFFF" : "#613F24" },
+            ]}
+          >
+            BOXHUB
           </Text>
-        </TouchableOpacity>
-
+        </View>
         <View style={styles.headerIcons}>
           <TouchableOpacity
             style={styles.iconButton}
@@ -384,10 +387,9 @@ export default function HomeScreen() {
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={24}
-              color={colors.text}
+              color={isDarkMode ? "#FFF" : "#613F24"}
             />
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => router.push("/notifications")}
@@ -396,7 +398,7 @@ export default function HomeScreen() {
             <Ionicons
               name="notifications-outline"
               size={24}
-              color={colors.text}
+              color={isDarkMode ? "#FFF" : "#613F24"}
             />
           </TouchableOpacity>
         </View>
@@ -405,28 +407,193 @@ export default function HomeScreen() {
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={{ height: 10 }} />
+        {/* SEARCH CARD */}
+        <View style={{ zIndex: 10, elevation: 10 }}>
+          <View style={[styles.searchCardContainer, themeStyles.searchCard]}>
+            <TouchableOpacity
+              style={styles.searchCardRow}
+              onPress={() => setShowLocationDropdown(!showLocationDropdown)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.searchCardLabel}>
+                {t("destination", "Điểm đến")}
+              </Text>
+              <View style={styles.searchCardValueRow}>
+                <Ionicons
+                  name="location-outline"
+                  size={20}
+                  color={colors.primary}
+                  style={{ marginRight: 8 }}
+                />
+                <Text
+                  style={[
+                    styles.searchCardValue,
+                    themeStyles.text,
+                    !selectedLocation && { color: colors.subText },
+                  ]}
+                >
+                  {selectedLocation
+                    ? t(selectedLocation)
+                    : t("where_to_go", "Bạn muốn ở đâu?")}
+                </Text>
+                <Ionicons
+                  name={showLocationDropdown ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  color={colors.subText}
+                />
+              </View>
+            </TouchableOpacity>
 
-        {/* Most Popular Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, themeStyles.text]}>
-              {t("most_popular", "Most Popular")}
-            </Text>
-            <TouchableOpacity>
-              <Text style={[styles.seeAllText, { color: colors.primary }]}>
-                {t("see_all", "See All")}
+            {showLocationDropdown && (
+              <View style={[styles.dropdownContainer, themeStyles.dropdownBg]}>
+                <TouchableOpacity
+                  style={[
+                    styles.listOption,
+                    themeStyles.border,
+                    { paddingHorizontal: 16 },
+                  ]}
+                  onPress={() => {
+                    setShowLocationDropdown(false);
+                    router.push("/map");
+                  }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <Ionicons
+                      name="navigate-circle"
+                      size={24}
+                      color="#4285F4"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text
+                      style={[
+                        styles.listText,
+                        themeStyles.text,
+                        { fontFamily: "Poppins_600SemiBold" },
+                      ]}
+                    >
+                      {t("near_me", "Gần tôi")}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <ScrollView
+                  style={{ maxHeight: 200 }}
+                  nestedScrollEnabled={true}
+                >
+                  {locationOptions.map((loc, index) => (
+                    <TouchableOpacity
+                      key={loc}
+                      style={[
+                        styles.listOption,
+                        index !== locationOptions.length - 1 &&
+                          themeStyles.border,
+                        { paddingHorizontal: 16 },
+                      ]}
+                      onPress={() => {
+                        setSelectedLocation(loc);
+                        setShowLocationDropdown(false);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.listText,
+                          themeStyles.text,
+                          selectedLocation === loc && {
+                            color: colors.primary,
+                            fontFamily: "Poppins_600SemiBold",
+                          },
+                        ]}
+                      >
+                        {t(loc)}
+                      </Text>
+                      {selectedLocation === loc && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={24}
+                          color={colors.primary}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            <View style={[styles.horizontalLine, themeStyles.border]} />
+
+            <View style={styles.searchCardSplitRow}>
+              <TouchableOpacity
+                style={styles.searchCardHalf}
+                onPress={() => {
+                  setShowLocationDropdown(false);
+                  setShowCalendar(true);
+                }}
+              >
+                <Text style={styles.searchCardLabel}>
+                  {t("time_range", "Thời gian")}
+                </Text>
+                <Text
+                  style={[
+                    styles.searchCardValueSplit,
+                    themeStyles.text,
+                    !selectedDate && { color: colors.subText },
+                  ]}
+                >
+                  {getDisplayDateRange()}
+                </Text>
+              </TouchableOpacity>
+              <View style={[styles.verticalLine, themeStyles.border]} />
+              <TouchableOpacity
+                style={styles.searchCardHalf}
+                onPress={() => {
+                  setShowLocationDropdown(false);
+                  setShowBoxTypeModal(true);
+                }}
+              >
+                <Text style={styles.searchCardLabel}>
+                  {t("box_type", "Loại phòng")}
+                </Text>
+                <Text
+                  style={[
+                    styles.searchCardValueSplit,
+                    themeStyles.text,
+                    !boxType && { color: colors.subText },
+                  ]}
+                >
+                  {boxType ? t(boxType) : t("select_box_type", "Chọn phòng")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.searchButton, { backgroundColor: colors.primary }]}
+              onPress={handleSearch}
+            >
+              <Text style={styles.searchButtonText}>
+                {t("search", "Tìm kiếm")}
               </Text>
             </TouchableOpacity>
           </View>
+        </View>
 
+        {/* MOST POPULAR SECTION */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, themeStyles.text]}>
+              {t("most_popular", "Nổi bật nhất")}
+            </Text>
+            <TouchableOpacity>
+              <Text style={[styles.seeAllText, { color: colors.primary }]}>
+                {t("see_all", "Xem tất cả")}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {/* Dùng mockData động thay vì MOCK_DATA tĩnh */}
             {mockData
               .filter((item) => item.type === "popular")
               .map((item) => (
@@ -440,25 +607,23 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
-        {/* Recommended Section */}
+        {/* RECOMMENDED SECTION */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, themeStyles.text]}>
-              {t("recommended", "Recommended")}
+              {t("recommended", "Đề xuất cho bạn")}
             </Text>
             <TouchableOpacity>
               <Text style={[styles.seeAllText, { color: colors.primary }]}>
-                {t("see_all", "See All")}
+                {t("see_all", "Xem tất cả")}
               </Text>
             </TouchableOpacity>
           </View>
-
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.horizontalScroll}
           >
-            {/* Dùng mockData động */}
             {mockData
               .filter((item) => item.type === "recommended")
               .map((item) => (
@@ -472,51 +637,348 @@ export default function HomeScreen() {
           </ScrollView>
         </View>
 
+        {/* PHẦN MỚI THÊM: KHÁM PHÁ (EXPLORE) */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={[styles.sectionTitle, themeStyles.text]}>
+              {t("explore", "Khám phá thế giới")}
+            </Text>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.horizontalScroll}
+          >
+            {EXPLORE_DATA.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.exploreCard, themeStyles.card]}
+                activeOpacity={0.9}
+              >
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.exploreImage}
+                />
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.8)"]}
+                  style={styles.exploreGradient}
+                >
+                  <Text style={styles.exploreTitle}>{item.title}</Text>
+                  <Text style={styles.exploreSubtitle}>
+                    {item.places} địa điểm
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* --- MODALS --- */}
+      <Modal
+        visible={showBoxTypeModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowBoxTypeModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalBgWrapper}
+          activeOpacity={1}
+          onPress={() => setShowBoxTypeModal(false)}
+        >
+          <View style={[styles.miniModal, themeStyles.card]}>
+            <Text style={[styles.miniModalTitle, themeStyles.text]}>
+              {t("select_box_type", "Loại Phòng")}
+            </Text>
+            {boxTypeOptions.map((option, index) => {
+              const isLast = index === boxTypeOptions.length - 1;
+              return (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[styles.listOption, !isLast && themeStyles.border]}
+                  onPress={() => {
+                    setBoxType(option.label);
+                    setShowBoxTypeModal(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.listText,
+                      themeStyles.text,
+                      boxType === option.label && {
+                        color: colors.primary,
+                        fontFamily: "Poppins_600SemiBold",
+                      },
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                  {boxType === option.label && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Calendar Modal */}
+      <Modal visible={showCalendar} animationType="slide" transparent={true}>
+        <View style={styles.modalBgWrapper}>
+          <View style={[styles.calendarModal, themeStyles.modalBg]}>
+            <View style={[styles.modalTopHeader, themeStyles.border]}>
+              <TouchableOpacity
+                onPress={() => setShowCalendar(false)}
+                style={{ padding: 4 }}
+              >
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+              <Text style={[styles.modalTopTitle, themeStyles.text]}>
+                {t("select_time", "Chọn thời gian")}
+              </Text>
+              <View style={{ width: 32 }} />
+            </View>
+
+            <View style={styles.calendarHeader}>
+              <TouchableOpacity onPress={() => changeMonth(-1)}>
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+              <Text style={[styles.monthYear, themeStyles.text]}>
+                {currentMonth.toLocaleDateString("en-US", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Text>
+              <TouchableOpacity onPress={() => changeMonth(1)}>
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={[styles.weekDays, themeStyles.border]}>
+              {["SU", "MO", "TU", "WE", "TH", "FR", "SA"].map((day) => (
+                <Text key={day} style={[styles.weekDay, themeStyles.subText]}>
+                  {t(`day_${day.toLowerCase()}`, day)}
+                </Text>
+              ))}
+            </View>
+
+            <View style={styles.calendarGrid}>
+              {(() => {
+                const { firstDay, daysInMonth } = getDaysInMonth(currentMonth);
+                const days = [];
+                for (let i = 0; i < firstDay; i++)
+                  days.push(<View key={`empty-${i}`} style={styles.dayCell} />);
+                for (let day = 1; day <= daysInMonth; day++) {
+                  const currentDate = new Date(
+                    currentMonth.getFullYear(),
+                    currentMonth.getMonth(),
+                    day,
+                  );
+                  let isSelected = false,
+                    isNextDaySelected = false;
+                  if (selectedDate) {
+                    isSelected =
+                      currentDate.getDate() === selectedDate.getDate() &&
+                      currentDate.getMonth() === selectedDate.getMonth() &&
+                      currentDate.getFullYear() === selectedDate.getFullYear();
+                    if (isOvernight) {
+                      const nextDate = new Date(selectedDate);
+                      nextDate.setDate(nextDate.getDate() + 1);
+                      isNextDaySelected =
+                        currentDate.getDate() === nextDate.getDate() &&
+                        currentDate.getMonth() === nextDate.getMonth() &&
+                        currentDate.getFullYear() === nextDate.getFullYear();
+                    }
+                  }
+                  const isHighlighted = isSelected || isNextDaySelected;
+                  days.push(
+                    <TouchableOpacity
+                      key={day}
+                      style={[
+                        styles.dayCell,
+                        isHighlighted && styles.selectedDay,
+                        isHighlighted && { backgroundColor: colors.primary },
+                      ]}
+                      onPress={() => handleDateSelect(day)}
+                    >
+                      <Text
+                        style={[
+                          styles.dayText,
+                          themeStyles.text,
+                          isHighlighted && styles.selectedDayText,
+                        ]}
+                      >
+                        {day}
+                      </Text>
+                    </TouchableOpacity>,
+                  );
+                }
+                return days;
+              })()}
+            </View>
+
+            {hasSelectedDate && (
+              <View
+                style={[
+                  styles.timeSection,
+                  themeStyles.border,
+                  { borderTopWidth: 1, paddingTop: 16 },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.overnightRow,
+                    {
+                      marginBottom: 16,
+                      paddingBottom: 16,
+                      borderBottomWidth: 1,
+                    },
+                    themeStyles.border,
+                  ]}
+                >
+                  <Text style={[styles.overnightText, themeStyles.text]}>
+                    {t("stay_overnight", "Ở qua đêm")}
+                  </Text>
+                  <Switch
+                    value={isOvernight}
+                    onValueChange={setIsOvernight}
+                    trackColor={{
+                      false: isDarkMode ? "#555" : "#E5E5E5",
+                      true: colors.primary,
+                    }}
+                    thumbColor="#FFFFFF"
+                  />
+                </View>
+                <View style={styles.timeRow}>
+                  <Text style={[styles.timeLabel, { color: colors.primary }]}>
+                    {t("from", "TỪ")}
+                  </Text>
+                  {/* Sửa cách truyền thuộc tính borderColor */}
+                  <TouchableOpacity
+                    style={[
+                      styles.timePickerButton,
+                      { borderColor: isDarkMode ? "#333" : "#EAEAEA" },
+                    ]}
+                    onPress={() => openTimePicker("from")}
+                  >
+                    <Text style={[styles.timeDisplay, themeStyles.text]}>
+                      {formatTime(fromTime)}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.timeRow}>
+                  <Text style={[styles.timeLabel, { color: colors.primary }]}>
+                    {t("to", "ĐẾN")}
+                  </Text>
+                  {/* Sửa cách truyền thuộc tính borderColor */}
+                  <TouchableOpacity
+                    style={[
+                      styles.timePickerButton,
+                      { borderColor: isDarkMode ? "#333" : "#EAEAEA" },
+                    ]}
+                    onPress={() => openTimePicker("to")}
+                  >
+                    <Text style={[styles.timeDisplay, themeStyles.text]}>
+                      {formatTime(toTime)}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[
+                styles.confirmButton,
+                {
+                  backgroundColor: hasSelectedDate
+                    ? colors.primary
+                    : colors.subText,
+                },
+              ]}
+              disabled={!hasSelectedDate}
+              onPress={() => setShowCalendar(false)}
+            >
+              <Text style={styles.confirmButtonText}>
+                {t("confirm_date_time", "Xác nhận Ngày & Giờ")}
+              </Text>
+            </TouchableOpacity>
+
+            {showTimePicker && (
+              <DateTimePicker
+                value={timePickerMode === "from" ? fromTime : toTime}
+                mode="time"
+                is24Hour={false}
+                display="spinner"
+                onChange={onTimeChange}
+                textColor={colors.text}
+              />
+            )}
+            {showTimePicker && Platform.OS === "ios" && (
+              <TouchableOpacity
+                style={{
+                  alignItems: "flex-end",
+                  marginTop: -10,
+                  marginBottom: 10,
+                }}
+                onPress={() => setShowTimePicker(false)}
+              >
+                <Text
+                  style={{
+                    color: colors.primary,
+                    fontFamily: "Poppins_600SemiBold",
+                  }}
+                >
+                  Done
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  // --- Header Styles ---
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingTop: 10,
-    paddingBottom: 10,
-    gap: 12,
+    paddingBottom: 16,
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
     borderWidth: 2,
-    borderColor: "#F0F0F0",
+    borderColor: "#FFF",
   },
-  headerSearchBar: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    height: 44,
-    borderRadius: 22,
-    paddingHorizontal: 16,
+  logoContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
+  logoText: {
+    fontSize: 26,
+    fontFamily: "Poppins_900Black",
+    letterSpacing: -0.5,
   },
-  headerSearchText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  headerIcons: { flexDirection: "row", gap: 8 },
   iconButton: {
     width: 40,
     height: 40,
@@ -533,75 +995,69 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     zIndex: 1,
   },
-  // --- Modal Styles ---
-  modalContainer: {
-    flex: 1,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    gap: 12,
-  },
-  modalSearchBar: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    height: 44,
-    borderRadius: 22,
-    paddingHorizontal: 16,
-  },
-  modalInput: {
-    flex: 1,
-    fontFamily: "Poppins_400Regular",
-    fontSize: 15,
-  },
-  modalContent: {
-    padding: 20,
-  },
-  suggestionTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 16,
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  locationItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  locationIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F5F5F5",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  nearMeIcon: {
-    backgroundColor: "#4285F4",
-  },
-  locationTitle: {
-    fontFamily: "Poppins_600SemiBold",
-    fontSize: 15,
-  },
-  locationSubtitle: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 13,
-  },
-  locationText: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 15,
-  },
-  // --- Section Styles ---
-  section: {
-    marginBottom: 24,
+
+  searchCardContainer: {
+    marginHorizontal: 20,
     marginTop: 10,
+    marginBottom: 24,
+    borderRadius: 16,
+    padding: 4,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 6,
   },
+  searchCardRow: { padding: 16, paddingBottom: 12 },
+  searchCardLabel: {
+    fontSize: 13,
+    fontFamily: "Poppins_500Medium",
+    color: "#888",
+    marginBottom: 6,
+  },
+  searchCardValueRow: { flexDirection: "row", alignItems: "center" },
+  searchCardValue: { fontSize: 17, fontFamily: "Poppins_600SemiBold", flex: 1 },
+  horizontalLine: { height: 1, marginHorizontal: 16, borderBottomWidth: 1 },
+
+  dropdownContainer: {
+    position: "absolute",
+    top: 74,
+    left: 8,
+    right: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 20,
+    zIndex: 999,
+    overflow: "hidden",
+  },
+  searchCardSplitRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+    zIndex: 1,
+  },
+  searchCardHalf: { flex: 1, padding: 16 },
+  searchCardValueSplit: { fontSize: 15, fontFamily: "Poppins_600SemiBold" },
+  verticalLine: { width: 1, height: "60%", borderLeftWidth: 1 },
+  searchButton: {
+    margin: 12,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  searchButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
+  },
+
+  section: { marginBottom: 28, marginTop: 10 },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -609,25 +1065,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    fontFamily: "Poppins_700Bold",
-  },
-  seeAllText: {
-    fontSize: 14,
-    fontFamily: "Poppins_600SemiBold",
-  },
-  horizontalScroll: {
-    paddingLeft: 20,
-  },
-  // --- Card Styles ---
+  sectionTitle: { fontSize: 20, fontFamily: "Poppins_700Bold" },
+  seeAllText: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
+  horizontalScroll: { paddingLeft: 20 },
+
   card: {
     width: 280,
     marginRight: 16,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#F5F5F5",
     position: "relative",
     height: 200,
   },
@@ -646,17 +1092,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  cardImage: {
-    width: "100%",
-    height: "100%",
-  },
+  cardImage: { width: "100%", height: "100%" },
   cardContent: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: 16,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   cardFooter: {
     flexDirection: "row",
@@ -674,13 +1117,11 @@ const styles = StyleSheet.create({
   },
   cardRatingText: {
     fontSize: 11,
-    fontWeight: "700",
     color: "#262626",
     fontFamily: "Poppins_700Bold",
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: "700",
     color: "#FFFFFF",
     marginBottom: 2,
     fontFamily: "Poppins_700Bold",
@@ -691,14 +1132,140 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     fontFamily: "Poppins_400Regular",
   },
-  cardPrice: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    fontFamily: "Poppins_700Bold",
+  cardPrice: { fontSize: 20, color: "#FFFFFF", fontFamily: "Poppins_700Bold" },
+  priceUnit: { fontSize: 14, fontFamily: "Poppins_400Regular" },
+
+  // Explore Styles
+  exploreCard: {
+    width: 140,
+    height: 180,
+    marginRight: 16,
+    borderRadius: 16,
+    overflow: "hidden",
   },
-  priceUnit: {
-    fontSize: 14,
-    fontWeight: "400",
+  exploreImage: { width: "100%", height: "100%" },
+  exploreGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "60%",
+    justifyContent: "flex-end",
+    padding: 12,
+  },
+  exploreTitle: {
+    color: "#FFF",
+    fontSize: 15,
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: 2,
+  },
+  exploreSubtitle: {
+    color: "#EEE",
+    fontSize: 12,
+    fontFamily: "Poppins_400Regular",
+  },
+
+  modalBgWrapper: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  miniModal: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  miniModalTitle: {
+    fontSize: 20,
+    fontFamily: "Poppins_700Bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  listOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+  listText: { fontSize: 16, fontFamily: "Poppins_500Medium" },
+
+  calendarModal: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: "90%",
+  },
+  modalTopHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: 16,
+    marginBottom: 20,
+    borderBottomWidth: 1,
+  },
+  modalTopTitle: { fontSize: 18, fontFamily: "Poppins_700Bold" },
+  calendarHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  monthYear: { fontSize: 20, fontFamily: "Poppins_700Bold" },
+  weekDays: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+  },
+  weekDay: {
+    width: 40,
+    textAlign: "center",
+    fontSize: 12,
+    fontFamily: "Poppins_500Medium",
+  },
+  calendarGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
+  dayCell: {
+    width: "14.28%",
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  selectedDay: { borderRadius: 50 },
+  dayText: { fontSize: 16, fontFamily: "Poppins_400Regular" },
+  selectedDayText: { color: "#FFFFFF", fontFamily: "Poppins_600SemiBold" },
+  timeSection: { marginBottom: 24 },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  timeLabel: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
+  timePickerButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  timeDisplay: { fontSize: 16, fontFamily: "Poppins_600SemiBold" },
+  overnightRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  overnightText: { fontSize: 15, fontFamily: "Poppins_500Medium" },
+  confirmButton: {
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  confirmButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: "Poppins_700Bold",
   },
 });

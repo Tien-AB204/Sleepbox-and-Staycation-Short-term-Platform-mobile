@@ -75,7 +75,7 @@ const getFavoriteItems = (t: any): { [key: string]: FavoriteItem } => ({
   "skyline-nook-1": {
     id: "skyline-nook-1",
     title: "Skyline Nook",
-    location: `${t("district_2")}, ${t("hcmc")}`,
+    location: `${t("thu_duc_city")}, ${t("hcmc")}`,
     price: "$22",
     priceUnit: "/hour",
     rating: "4.6",

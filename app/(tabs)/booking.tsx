@@ -383,7 +383,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     fontFamily: "PlusJakartaSans_700Bold",
-    fontStyle: "italic",
   },
 
   tabContainer: {
@@ -434,14 +433,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     fontFamily: "PlusJakartaSans_700Bold",
-    fontStyle: "italic",
     marginBottom: 8,
   },
-  boxNumber: { fontStyle: "italic" },
+  boxNumber: {},
   bookingDateTime: {
     fontSize: 14,
     fontFamily: "PlusJakartaSans_400Regular",
-    fontStyle: "italic",
     marginBottom: 16,
   },
 
