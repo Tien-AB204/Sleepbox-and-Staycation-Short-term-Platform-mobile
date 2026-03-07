@@ -1,11 +1,11 @@
 import {
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_900Black,
+  PlusJakartaSans_400Regular,
+  PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
+  PlusJakartaSans_700Bold,
+  PlusJakartaSans_800ExtraBold,
   useFonts,
-} from "@expo-google-fonts/poppins";
+} from "@expo-google-fonts/plus-jakarta-sans";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -184,11 +184,11 @@ export default function HomeScreen() {
   const { colors, isDarkMode } = useTheme();
   const mockData = getMockData(t);
   const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-    Poppins_900Black,
+    PlusJakartaSans_400Regular,
+    PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
+    PlusJakartaSans_700Bold,
+    PlusJakartaSans_800ExtraBold,
   });
 
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -470,7 +470,7 @@ export default function HomeScreen() {
                       style={[
                         styles.listText,
                         themeStyles.text,
-                        { fontFamily: "Poppins_600SemiBold" },
+                        { fontFamily: "PlusJakartaSans_600SemiBold" },
                       ]}
                     >
                       {t("near_me", "Gần tôi")}
@@ -501,7 +501,7 @@ export default function HomeScreen() {
                           themeStyles.text,
                           selectedLocation === loc && {
                             color: colors.primary,
-                            fontFamily: "Poppins_600SemiBold",
+                            fontFamily: "PlusJakartaSans_600SemiBold",
                           },
                         ]}
                       >
@@ -677,6 +677,7 @@ export default function HomeScreen() {
       </ScrollView>
 
       {/* --- MODALS --- */}
+      {/* Box Type Modal */}
       <Modal
         visible={showBoxTypeModal}
         animationType="fade"
@@ -709,7 +710,7 @@ export default function HomeScreen() {
                       themeStyles.text,
                       boxType === option.label && {
                         color: colors.primary,
-                        fontFamily: "Poppins_600SemiBold",
+                        fontFamily: "PlusJakartaSans_600SemiBold",
                       },
                     ]}
                   >
@@ -868,7 +869,6 @@ export default function HomeScreen() {
                   <Text style={[styles.timeLabel, { color: colors.primary }]}>
                     {t("from", "TỪ")}
                   </Text>
-                  {/* Sửa cách truyền thuộc tính borderColor */}
                   <TouchableOpacity
                     style={[
                       styles.timePickerButton,
@@ -885,7 +885,6 @@ export default function HomeScreen() {
                   <Text style={[styles.timeLabel, { color: colors.primary }]}>
                     {t("to", "ĐẾN")}
                   </Text>
-                  {/* Sửa cách truyền thuộc tính borderColor */}
                   <TouchableOpacity
                     style={[
                       styles.timePickerButton,
@@ -940,7 +939,7 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     color: colors.primary,
-                    fontFamily: "Poppins_600SemiBold",
+                    fontFamily: "PlusJakartaSans_600SemiBold",
                   }}
                 >
                   Done
@@ -975,7 +974,7 @@ const styles = StyleSheet.create({
   logoContainer: { flex: 1, alignItems: "center", justifyContent: "center" },
   logoText: {
     fontSize: 26,
-    fontFamily: "Poppins_900Black",
+    fontFamily: "PlusJakartaSans_800ExtraBold",
     letterSpacing: -0.5,
   },
   headerIcons: { flexDirection: "row", gap: 8 },
@@ -1012,12 +1011,16 @@ const styles = StyleSheet.create({
   searchCardRow: { padding: 16, paddingBottom: 12 },
   searchCardLabel: {
     fontSize: 13,
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
     color: "#888",
     marginBottom: 6,
   },
   searchCardValueRow: { flexDirection: "row", alignItems: "center" },
-  searchCardValue: { fontSize: 17, fontFamily: "Poppins_600SemiBold", flex: 1 },
+  searchCardValue: {
+    fontSize: 17,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+    flex: 1,
+  },
   horizontalLine: { height: 1, marginHorizontal: 16, borderBottomWidth: 1 },
 
   dropdownContainer: {
@@ -1042,7 +1045,10 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   searchCardHalf: { flex: 1, padding: 16 },
-  searchCardValueSplit: { fontSize: 15, fontFamily: "Poppins_600SemiBold" },
+  searchCardValueSplit: {
+    fontSize: 15,
+    fontFamily: "PlusJakartaSans_600SemiBold",
+  },
   verticalLine: { width: 1, height: "60%", borderLeftWidth: 1 },
   searchButton: {
     margin: 12,
@@ -1054,7 +1060,7 @@ const styles = StyleSheet.create({
   searchButtonText: {
     color: "#FFF",
     fontSize: 16,
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
 
   section: { marginBottom: 28, marginTop: 10 },
@@ -1065,8 +1071,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
-  sectionTitle: { fontSize: 20, fontFamily: "Poppins_700Bold" },
-  seeAllText: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
+  sectionTitle: { fontSize: 20, fontFamily: "PlusJakartaSans_700Bold" },
+  seeAllText: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
   horizontalScroll: { paddingLeft: 20 },
 
   card: {
@@ -1118,22 +1124,26 @@ const styles = StyleSheet.create({
   cardRatingText: {
     fontSize: 11,
     color: "#262626",
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   cardTitle: {
     fontSize: 18,
     color: "#FFFFFF",
     marginBottom: 2,
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
   cardLocation: {
     fontSize: 12,
     color: "#EEEEEE",
     marginBottom: 4,
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
-  cardPrice: { fontSize: 20, color: "#FFFFFF", fontFamily: "Poppins_700Bold" },
-  priceUnit: { fontSize: 14, fontFamily: "Poppins_400Regular" },
+  cardPrice: {
+    fontSize: 20,
+    color: "#FFFFFF",
+    fontFamily: "PlusJakartaSans_700Bold",
+  },
+  priceUnit: { fontSize: 14, fontFamily: "PlusJakartaSans_400Regular" },
 
   // Explore Styles
   exploreCard: {
@@ -1156,13 +1166,13 @@ const styles = StyleSheet.create({
   exploreTitle: {
     color: "#FFF",
     fontSize: 15,
-    fontFamily: "Poppins_600SemiBold",
+    fontFamily: "PlusJakartaSans_600SemiBold",
     marginBottom: 2,
   },
   exploreSubtitle: {
     color: "#EEE",
     fontSize: 12,
-    fontFamily: "Poppins_400Regular",
+    fontFamily: "PlusJakartaSans_400Regular",
   },
 
   modalBgWrapper: {
@@ -1178,7 +1188,7 @@ const styles = StyleSheet.create({
   },
   miniModalTitle: {
     fontSize: 20,
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
     marginBottom: 16,
     textAlign: "center",
   },
@@ -1188,7 +1198,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
   },
-  listText: { fontSize: 16, fontFamily: "Poppins_500Medium" },
+  listText: { fontSize: 16, fontFamily: "PlusJakartaSans_500Medium" },
 
   calendarModal: {
     borderTopLeftRadius: 24,
@@ -1204,14 +1214,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderBottomWidth: 1,
   },
-  modalTopTitle: { fontSize: 18, fontFamily: "Poppins_700Bold" },
+  modalTopTitle: { fontSize: 18, fontFamily: "PlusJakartaSans_700Bold" },
   calendarHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
   },
-  monthYear: { fontSize: 20, fontFamily: "Poppins_700Bold" },
+  monthYear: { fontSize: 20, fontFamily: "PlusJakartaSans_700Bold" },
   weekDays: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -1223,7 +1233,7 @@ const styles = StyleSheet.create({
     width: 40,
     textAlign: "center",
     fontSize: 12,
-    fontFamily: "Poppins_500Medium",
+    fontFamily: "PlusJakartaSans_500Medium",
   },
   calendarGrid: { flexDirection: "row", flexWrap: "wrap", marginBottom: 8 },
   dayCell: {
@@ -1234,8 +1244,11 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   selectedDay: { borderRadius: 50 },
-  dayText: { fontSize: 16, fontFamily: "Poppins_400Regular" },
-  selectedDayText: { color: "#FFFFFF", fontFamily: "Poppins_600SemiBold" },
+  dayText: { fontSize: 16, fontFamily: "PlusJakartaSans_400Regular" },
+  selectedDayText: {
+    color: "#FFFFFF",
+    fontFamily: "PlusJakartaSans_600SemiBold",
+  },
   timeSection: { marginBottom: 24 },
   timeRow: {
     flexDirection: "row",
@@ -1243,20 +1256,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  timeLabel: { fontSize: 14, fontFamily: "Poppins_600SemiBold" },
+  timeLabel: { fontSize: 14, fontFamily: "PlusJakartaSans_600SemiBold" },
   timePickerButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
   },
-  timeDisplay: { fontSize: 16, fontFamily: "Poppins_600SemiBold" },
+  timeDisplay: { fontSize: 16, fontFamily: "PlusJakartaSans_600SemiBold" },
   overnightRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  overnightText: { fontSize: 15, fontFamily: "Poppins_500Medium" },
+  overnightText: { fontSize: 15, fontFamily: "PlusJakartaSans_500Medium" },
   confirmButton: {
     paddingVertical: 16,
     borderRadius: 16,
@@ -1266,6 +1279,6 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "PlusJakartaSans_700Bold",
   },
 });

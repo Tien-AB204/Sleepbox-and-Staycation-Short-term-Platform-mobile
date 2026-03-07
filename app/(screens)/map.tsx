@@ -18,12 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import {
-  BackIcon,
-  ChatIcon,
-  FilterFunnelIcon,
-  SearchIcon,
-} from "../../components/Icons";
+import { BackIcon, ChatIcon, SearchIcon } from "../../components/Icons";
 
 interface LocationMarker {
   id: string;
@@ -147,12 +142,12 @@ export default function MapScreen() {
               placeholderTextColor="#B0B0B0"
             />
           </View>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => router.push("/filter")}
             style={styles.filterButton}
           >
             <FilterFunnelIcon size={22} color="#1A1A1A" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Filter Tabs */}
