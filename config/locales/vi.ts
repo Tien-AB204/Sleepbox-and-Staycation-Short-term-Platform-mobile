@@ -123,6 +123,52 @@ const vi: typeof en = {
   view_detail: "Xem chi tiết",
   rating: "Đánh giá",
   rebook: "Đặt lại",
+
+  // ==========================================
+  // --- PROFILE SCREEN STRINGS ---
+  // ==========================================
+  account_security: "Tài khoản & Bảo mật",
+  account_info: "Thông tin tài khoản",
+  password_security: "Mật khẩu & Bảo mật",
+  settings: "Cài đặt",
+  currency: "Tiền tệ",
+  vnd: "Việt Nam Đồng",
+  notification_settings: "Cài đặt thông báo",
+  app_version: "Phiên bản ứng dụng",
+  terms_conditions: "Điều khoản & Điều kiện",
+  privacy_policy: "Chính sách Quyền riêng tư",
+  about_us: "Về chúng tôi",
+  we_know_you: "Chúng tôi biết về bạn.",
+  personal_data: "Dữ liệu cá nhân",
+  change: "Thay đổi",
+  //cancel: "Hủy",
+  full_name: "Tên đầy đủ", // if needed
+  first_name: "Tên",
+  last_name: "Họ",
+  linked_accounts: "Các tài khoản đã liên kết",
+  link_btn: "Liên kết",
+  edit_username: "Chỉnh sửa tên người dùng",
+  your_preferred_username: "Nhập tên người dùng ưa thích của bạn:",
+  change_password: "Thay đổi mật khẩu",
+  delete_account: "Xóa tài khoản",
+  delete_warning: "Sau khi tài khoản của bạn bị xóa, bạn sẽ không thể truy xuất dữ liệu của mình. Hành động này không thể hoàn tác.",
+  you_are_about_to_delete: "Bạn sắp xóa:",
+  why_delete: "Tại sao bạn lại xóa tài khoản của mình?",
+  select_reason: "Chọn lý do",
+  continue: "Tiếp tục",
+  reason_email: "Tôi nhận được quá nhiều email",
+  reason_complaint: "Tôi có khiếu nại về việc đặt phòng của mình",
+  reason_other_account: "Tôi muốn sử dụng email/số điện thoại khác",
+  reason_privacy: "Tôi muốn xóa dữ liệu của mình",
+  reason_other: "Khác",
+  choose: "Chọn",
+  noti_booking: "Thông báo Booking",
+  noti_booking_desc: "Thay đổi trạng thái booking và phê duyệt",
+  noti_system: "Thông báo Hệ thống",
+  noti_system_desc: "Cập nhật, chỉnh sửa hệ thống",
+  noti_checkin: "Thông báo Check-in",
+  noti_checkin_desc: "Ngày giờ check-in sắp tới",
+  // ==========================================
 };
 
 export default vi;
